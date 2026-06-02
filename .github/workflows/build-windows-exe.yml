@@ -1,0 +1,53 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-windows-exe:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+
+      - name: Build CodeRain.exe
+        run: |
+          pyinstaller --clean --noconfirm --onefile --name CodeRain CodeRain.py
+
+      - name: Verify executable
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist\CodeRain.exe")) {
+            throw "dist\CodeRain.exe was not created."
+          }
+          .\dist\CodeRain.exe --help
+
+      - name: Prepare release package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path CodeRain_Final
+          Copy-Item dist\CodeRain.exe CodeRain_Final\CodeRain.exe
+          Copy-Item run.bat CodeRain_Final\run.bat
+          Copy-Item USER_GUIDE.txt CodeRain_Final\USER_GUIDE.txt
+          Compress-Archive -Path CodeRain_Final\* -DestinationPath CodeRain_Final.zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeRain-Windows-EXE
+          path: CodeRain_Final.zip
+          retention-days: 30
