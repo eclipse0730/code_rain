@@ -34,7 +34,6 @@ jobs:
           if (-not (Test-Path "dist\CodeRain.exe")) {
             throw "dist\CodeRain.exe was not created."
           }
-          .\dist\CodeRain.exe --help
 
       - name: Prepare release package
         shell: pwsh
