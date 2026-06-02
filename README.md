@@ -63,3 +63,11 @@ USER_GUIDE_MAC.txt
 맥 사용자는 `run-macos.command`를 더블클릭하면 됩니다.
 
 macOS 보안 경고가 나오면 `run-macos.command`를 Control 키를 누른 채 클릭한 뒤 `열기`를 선택하세요.
+
+## 광고용 에러 버전
+
+빌드 도중 에러가 나는 연출용 버전입니다. 실제 오류가 아니라 촬영용 가짜 로그입니다.
+
+Windows에서는 `CodeRain-Error-Windows`를 다운로드한 뒤 `run-error.bat`를 더블클릭합니다.
+
+macOS에서는 `CodeRain-Error-macOS`를 다운로드한 뒤 `run-error-macos.command`를 더블클릭합니다.

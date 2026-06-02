@@ -28,12 +28,16 @@ jobs:
       - name: Build CodeRain.exe
         run: |
           pyinstaller --clean --noconfirm --onefile --name CodeRain CodeRain.py
+          pyinstaller --clean --noconfirm --onefile --name CodeRain_Error CodeRain_Error.py
 
       - name: Verify executable
         shell: pwsh
         run: |
           if (-not (Test-Path "dist\CodeRain.exe")) {
             throw "dist\CodeRain.exe was not created."
+          }
+          if (-not (Test-Path "dist\CodeRain_Error.exe")) {
+            throw "dist\CodeRain_Error.exe was not created."
           }
 
       - name: Prepare release package
@@ -45,11 +49,24 @@ jobs:
           Copy-Item USER_GUIDE.txt CodeRain_Final\USER_GUIDE.txt
           Compress-Archive -Path CodeRain_Final\* -DestinationPath CodeRain_Final.zip -Force
 
+          New-Item -ItemType Directory -Force -Path CodeRain_Error_Windows
+          Copy-Item dist\CodeRain_Error.exe CodeRain_Error_Windows\CodeRain_Error.exe
+          Copy-Item run-error.bat CodeRain_Error_Windows\run-error.bat
+          Copy-Item USER_GUIDE_ERROR.txt CodeRain_Error_Windows\USER_GUIDE_ERROR.txt
+          Compress-Archive -Path CodeRain_Error_Windows\* -DestinationPath CodeRain_Error_Windows.zip -Force
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: CodeRain-Windows-EXE
           path: CodeRain_Final.zip
+          retention-days: 30
+
+      - name: Upload error artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeRain-Error-Windows
+          path: CodeRain_Error_Windows.zip
           retention-days: 30
 
   build-macos-app:
@@ -73,10 +90,12 @@ jobs:
       - name: Build CodeRain for macOS
         run: |
           pyinstaller --clean --noconfirm --onefile --name CodeRain-macOS CodeRain.py
+          pyinstaller --clean --noconfirm --onefile --name CodeRain_Error-macOS CodeRain_Error.py
 
       - name: Verify executable
         run: |
           test -f dist/CodeRain-macOS
+          test -f dist/CodeRain_Error-macOS
 
       - name: Prepare release package
         run: |
@@ -88,9 +107,24 @@ jobs:
           chmod +x CodeRain_macOS/run-macos.command
           ditto -c -k --keepParent CodeRain_macOS CodeRain_macOS.zip
 
+          mkdir -p CodeRain_Error_macOS
+          cp dist/CodeRain_Error-macOS CodeRain_Error_macOS/CodeRain_Error
+          cp run-error-macos.command CodeRain_Error_macOS/run-error-macos.command
+          cp USER_GUIDE_ERROR.txt CodeRain_Error_macOS/USER_GUIDE_ERROR.txt
+          chmod +x CodeRain_Error_macOS/CodeRain_Error
+          chmod +x CodeRain_Error_macOS/run-error-macos.command
+          ditto -c -k --keepParent CodeRain_Error_macOS CodeRain_Error_macOS.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: CodeRain-macOS
           path: CodeRain_macOS.zip
+          retention-days: 30
+
+      - name: Upload error artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeRain-Error-macOS
+          path: CodeRain_Error_macOS.zip
           retention-days: 30
